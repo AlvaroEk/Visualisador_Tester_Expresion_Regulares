@@ -1,5 +1,6 @@
 import { RegexExpression } from '../../domain/entities/RegexExpression';
 import { MatchResult } from '../../domain/entities/MatchResult';
+import { parse } from 'regexp-tree';
 
 export class RegexParserDataSource {
   parseRegex(input: string, expression: RegexExpression): MatchResult {
@@ -14,23 +15,23 @@ export class RegexParserDataSource {
       if (!regex.global) break;
     }
 
-    const ast = this.generateMockAST(expression.pattern); // puede usar una lib real luego
+    const ast = this.generateRealAST(expression.pattern, expression.flags);
 
     return {
       matches,
       indices,
-      ast
+      ast,
     };
   }
 
-  private generateMockAST(pattern: string) {
-    // Simulación básica
-    return {
-      type: 'Root',
-      children: pattern.split('').map(c => ({
-        type: 'Character',
-        value: c
-      }))
-    };
+  private generateRealAST(pattern: string, flags: string) {
+    try {
+      return parse(`/${pattern}/${flags}`).body;
+    } catch (error) {
+      return {
+        type: 'Error',
+        value: 'Expresión inválida',
+      };
+    }
   }
 }

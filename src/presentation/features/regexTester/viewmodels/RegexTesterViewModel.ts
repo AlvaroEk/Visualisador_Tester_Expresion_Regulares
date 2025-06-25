@@ -1,7 +1,8 @@
-import { makeAutoObservable } from 'mobx'; // o Zustand, o tu elección de state manager
+import { makeAutoObservable } from 'mobx';
 import { RegexExpression } from '../../../../domain/entities/RegexExpression';
 import { MatchResult } from '../../../../domain/entities/MatchResult';
 import { ParseRegexUseCase } from '../../../../domain/usecases/ParseRegexUseCase';
+import { RegexHistoryService } from '../../../../services/regexHistoryService';
 
 export class RegexTesterViewModel {
   inputText: string = '';
@@ -10,7 +11,7 @@ export class RegexTesterViewModel {
   result: MatchResult | null = null;
 
   constructor(private parseRegexUseCase: ParseRegexUseCase) {
-    makeAutoObservable(this); // observable reactivo
+    makeAutoObservable(this);
   }
 
   setInputText(text: string) {
@@ -28,15 +29,23 @@ export class RegexTesterViewModel {
     this.tryParse();
   }
 
-  private tryParse() {
+  private async tryParse() {
     try {
+      if (!/^[gimsuy]*$/.test(this.flags)) {
+        this.result = null;
+        return;
+      }
+
       const expression: RegexExpression = {
         pattern: this.pattern,
         flags: this.flags,
       };
+
       this.result = this.parseRegexUseCase.execute(this.inputText, expression);
+
+      await RegexHistoryService.saveExpression(this.pattern, this.flags);
     } catch (error) {
-      this.result = null; // podrías manejar errores mejor
+      this.result = null;
     }
   }
 }
