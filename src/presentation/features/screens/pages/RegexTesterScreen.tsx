@@ -18,9 +18,11 @@ export const RegexTesterScreen = observer(() => {
       flags={viewModel.flags}
       matches={viewModel.result?.matches}
       ast={viewModel.result?.ast}
+      flagError={viewModel.flagError}
       onInputChange={(text: string) => viewModel.setInputText(text)}
       onPatternChange={(text: string) => viewModel.setPattern(text)}
       onFlagsChange={(text: string) => viewModel.setFlags(text)}
     />
   );
 });
+

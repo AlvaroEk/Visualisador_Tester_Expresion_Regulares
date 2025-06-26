@@ -1,5 +1,5 @@
 import React from 'react';
-import { ScrollView, View, Text } from 'react-native';
+import { ScrollView, Text } from 'react-native';
 import { RegexForm } from '../organisms/RegexForm';
 import { ASTTree } from '../organisms/ASTTree';
 import { MatchHighlight } from '../atoms/MatchHighlight';
@@ -14,6 +14,7 @@ export const RegexTesterTemplate = ({
   onInputChange,
   onPatternChange,
   onFlagsChange,
+  flagError,
 }: any) => (
   <ScrollView contentContainerStyle={{ padding: 16 }}>
     <RegexForm
@@ -23,9 +24,9 @@ export const RegexTesterTemplate = ({
       onInputChange={onInputChange}
       onPatternChange={onPatternChange}
       onFlagsChange={onFlagsChange}
+      flagError={flagError}
     />
 
-    {/* Historial debajo del formulario */}
     <RegexHistoryList
       onSelect={({ pattern, flags }) => {
         onPatternChange(pattern);

@@ -8,6 +8,7 @@ export class RegexTesterViewModel {
   inputText: string = '';
   pattern: string = '';
   flags: string = '';
+  flagError: string = '';
   result: MatchResult | null = null;
 
   constructor(private parseRegexUseCase: ParseRegexUseCase) {
@@ -31,20 +32,28 @@ export class RegexTesterViewModel {
 
   private async tryParse() {
     try {
-      if (!/^[gimsuy]*$/.test(this.flags)) {
-        this.result = null;
-        return;
+      const validFlags = 'gimsuy';
+      const flagSet = new Set(this.flags.split(''));
+
+      for (const flag of flagSet) {
+        if (!validFlags.includes(flag)) {
+          this.flagError = `Flag inválida: "${flag}"`;
+          this.result = null;
+          return;
+        }
       }
+
+      this.flagError = ''; // todo válido
 
       const expression: RegexExpression = {
         pattern: this.pattern,
-        flags: this.flags,
+        flags: [...flagSet].join(''),
       };
 
       this.result = this.parseRegexUseCase.execute(this.inputText, expression);
-
-      await RegexHistoryService.saveExpression(this.pattern, this.flags);
+      await RegexHistoryService.saveExpression(expression.pattern, expression.flags);
     } catch (error) {
+      this.flagError = 'Error al procesar la expresión';
       this.result = null;
     }
   }
