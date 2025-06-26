@@ -1,11 +1,23 @@
-import React from 'react';
-import { ScrollView, Text } from 'react-native';
+import React, { useState } from 'react';
+import {
+  ScrollView,
+  Text,
+  Button,
+  View,
+  StyleSheet,
+} from 'react-native';
+import { observer } from 'mobx-react-lite';
+import { themeStore } from '../../store/themeStore';
+import { Colors } from '../../theme/colors';
+
 import { RegexForm } from '../organisms/RegexForm';
 import { ASTTree } from '../organisms/ASTTree';
 import { MatchHighlight } from '../atoms/MatchHighlight';
 import { RegexHistoryList } from '../organisms/RegexHistoryList';
+import { HighlightedText } from '../atoms/HighlightedText';
+import { ThemeSelector } from '../components/molecules/ThemeSelector';
 
-export const RegexTesterTemplate = ({
+export const RegexTesterTemplate = observer(({
   inputText,
   pattern,
   flags,
@@ -15,30 +27,91 @@ export const RegexTesterTemplate = ({
   onPatternChange,
   onFlagsChange,
   flagError,
-}: any) => (
-  <ScrollView contentContainerStyle={{ padding: 16 }}>
-    <RegexForm
-      inputText={inputText}
-      pattern={pattern}
-      flags={flags}
-      onInputChange={onInputChange}
-      onPatternChange={onPatternChange}
-      onFlagsChange={onFlagsChange}
-      flagError={flagError}
-    />
+  indices,
+}: any) => {
+  const [showHistory, setShowHistory] = useState(false);
+  const isDark = themeStore.resolvedMode === 'dark';
+  const theme = isDark ? Colors.dark : Colors.light;
 
-    <RegexHistoryList
-      onSelect={({ pattern, flags }) => {
-        onPatternChange(pattern);
-        onFlagsChange(flags);
-      }}
-    />
+  return (
+    <ScrollView
+      style={[styles.wrapper, { backgroundColor: theme.background }]}
+      contentContainerStyle={styles.content}
+    >
+      <RegexForm
+        inputText={inputText}
+        pattern={pattern}
+        flags={flags}
+        onInputChange={onInputChange}
+        onPatternChange={onPatternChange}
+        onFlagsChange={onFlagsChange}
+        flagError={flagError}
+      />
 
-    <Text style={{ marginVertical: 10 }}>Resultados:</Text>
-    {matches?.map((m: string, i: number) => (
-      <MatchHighlight key={i} match={m} />
-    ))}
+      <View style={styles.section}>
+        <Button
+          title={showHistory ? 'Ocultar historial' : 'Mostrar historial'}
+          onPress={() => setShowHistory(!showHistory)}
+          color={theme.chipActive}
+        />
+      </View>
 
-    {ast && <ASTTree ast={ast} />}
-  </ScrollView>
-);
+      {showHistory && (
+        <RegexHistoryList
+          onSelect={({ pattern, flags }) => {
+            onPatternChange(pattern);
+            onFlagsChange(flags);
+          }}
+        />
+      )}
+
+      <Text style={[styles.heading, { color: theme.text }]}>
+        Texto con Coincidencias:
+      </Text>
+
+      <HighlightedText text={inputText} indices={indices ?? []} />
+
+      <Text style={[styles.countText, { color: theme.secondaryText }]}>
+        Total de coincidencias: {matches?.length ?? 0}
+      </Text>
+
+      <Text style={[styles.resultText, { color: theme.text }]}>
+        Resultados:
+      </Text>
+
+      {matches?.map((m: string, i: number) => (
+        <MatchHighlight key={i} match={m} />
+      ))}
+
+      {ast && <ASTTree ast={ast} />}
+
+      <ThemeSelector />
+    </ScrollView>
+  );
+});
+
+const styles = StyleSheet.create({
+  wrapper: {
+    flex: 1,
+  },
+  content: {
+    padding: 16,
+  },
+  section: {
+    marginVertical: 10,
+  },
+  heading: {
+    marginTop: 10,
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
+  countText: {
+    marginVertical: 10,
+    fontSize: 14,
+  },
+  resultText: {
+    marginVertical: 10,
+    fontSize: 15,
+    fontWeight: '600',
+  },
+});

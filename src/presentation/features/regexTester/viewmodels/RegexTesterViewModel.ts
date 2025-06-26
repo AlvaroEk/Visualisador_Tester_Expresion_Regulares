@@ -8,8 +8,8 @@ export class RegexTesterViewModel {
   inputText: string = '';
   pattern: string = '';
   flags: string = '';
-  flagError: string = '';
   result: MatchResult | null = null;
+  flagError: string | null = null;
 
   constructor(private parseRegexUseCase: ParseRegexUseCase) {
     makeAutoObservable(this);
@@ -31,30 +31,31 @@ export class RegexTesterViewModel {
   }
 
   private async tryParse() {
+    const validFlags = 'gimsuy';
+    const invalid = this.flags.split('').filter(f => !validFlags.includes(f));
+
+    if (invalid.length > 0) {
+      this.flagError = `Flags inválidos: ${invalid.join(', ')}`;
+      this.result = null;
+      return;
+    } else {
+      this.flagError = null;
+    }
+
     try {
-      const validFlags = 'gimsuy';
-      const flagSet = new Set(this.flags.split(''));
-
-      for (const flag of flagSet) {
-        if (!validFlags.includes(flag)) {
-          this.flagError = `Flag inválida: "${flag}"`;
-          this.result = null;
-          return;
-        }
-      }
-
-      this.flagError = ''; // todo válido
-
       const expression: RegexExpression = {
         pattern: this.pattern,
-        flags: [...flagSet].join(''),
+        flags: this.flags,
       };
 
-      this.result = this.parseRegexUseCase.execute(this.inputText, expression);
-      await RegexHistoryService.saveExpression(expression.pattern, expression.flags);
+      const parsed = this.parseRegexUseCase.execute(this.inputText, expression);
+      this.result = parsed;
+
+      // Guarda en historial
+      await RegexHistoryService.saveExpression(this.pattern, this.flags);
     } catch (error) {
-      this.flagError = 'Error al procesar la expresión';
       this.result = null;
+      console.warn('Error al analizar expresión:', error);
     }
   }
 }

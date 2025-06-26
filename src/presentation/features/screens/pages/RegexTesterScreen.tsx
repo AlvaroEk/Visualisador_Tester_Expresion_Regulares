@@ -6,8 +6,9 @@ import { ParseRegexUseCase } from '../../../../domain/usecases/ParseRegexUseCase
 import { RegexRepositoryImpl } from '../../../../data/repositories_impl/RegexRepositoryImpl';
 import { RegexParserDataSource } from '../../../../data/datasources/RegexParserDataSource';
 
-const repo = new RegexRepositoryImpl(new RegexParserDataSource());
-const useCase = new ParseRegexUseCase(repo);
+const dataSource = new RegexParserDataSource();
+const repository = new RegexRepositoryImpl(dataSource);
+const useCase = new ParseRegexUseCase(repository);
 const viewModel = new RegexTesterViewModel(useCase);
 
 export const RegexTesterScreen = observer(() => {
@@ -17,12 +18,12 @@ export const RegexTesterScreen = observer(() => {
       pattern={viewModel.pattern}
       flags={viewModel.flags}
       matches={viewModel.result?.matches}
+      indices={viewModel.result?.indices}
       ast={viewModel.result?.ast}
       flagError={viewModel.flagError}
-      onInputChange={(text: string) => viewModel.setInputText(text)}
-      onPatternChange={(text: string) => viewModel.setPattern(text)}
-      onFlagsChange={(text: string) => viewModel.setFlags(text)}
+      onInputChange={viewModel.setInputText.bind(viewModel)}
+      onPatternChange={viewModel.setPattern.bind(viewModel)}
+      onFlagsChange={viewModel.setFlags.bind(viewModel)}
     />
   );
 });
-
