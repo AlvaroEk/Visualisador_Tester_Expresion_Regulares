@@ -1,27 +1,48 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, StyleSheet, Text, useColorScheme } from 'react-native';
 import { observer } from 'mobx-react-lite';
 import { themeStore, ThemeMode } from '../../../store/themeStore';
 
-const options: ThemeMode[] = ['system', 'light', 'dark'];
+const icons = {
+  light: '🌞',
+  dark: '🌙',
+  system: '⚙️',
+};
 
 export const ThemeSelector = observer(() => {
   const current = themeStore.mode;
+  const resolved = themeStore.resolvedMode;
+  const isDark = resolved === 'dark';
+
+  const getActiveIcon = (): ThemeMode => {
+    if (current === 'system') return resolved;
+    return current;
+  };
 
   return (
     <View style={styles.container}>
-      <Text style={styles.label}>🌗 Modo de tema:</Text>
-      {options.map((opt) => (
+      {(['light', 'dark', 'system'] as ThemeMode[]).map((mode) => (
         <TouchableOpacity
-          key={opt}
-          onPress={() => themeStore.setMode(opt)}
+          key={mode}
+          onPress={() => themeStore.setMode(mode)}
           style={[
-            styles.button,
-            current === opt && styles.activeButton
+            styles.iconButton,
+            current === mode && styles.activeButton,
+            mode === 'system' && current === 'system'
+              ? resolved === 'light'
+                ? styles.lightSystem
+                : styles.darkSystem
+              : null,
           ]}
         >
-          <Text style={current === opt ? styles.activeText : styles.text}>
-            {opt === 'system' ? 'Automático' : opt === 'light' ? 'Claro' : 'Oscuro'}
+          <Text
+            style={[
+              styles.icon,
+              current === mode && styles.activeIcon,
+              isDark && { color: '#fff' },
+            ]}
+          >
+            {icons[mode]}
           </Text>
         </TouchableOpacity>
       ))}
@@ -31,27 +52,30 @@ export const ThemeSelector = observer(() => {
 
 const styles = StyleSheet.create({
   container: {
-    marginTop: 24,
-    paddingBottom: 24,
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginTop: 12,
   },
-  label: {
-    fontWeight: 'bold',
-    marginBottom: 8,
-  },
-  button: {
+  iconButton: {
+    marginHorizontal: 10,
     padding: 10,
-    borderRadius: 6,
-    backgroundColor: '#eee',
-    marginVertical: 4,
+    borderRadius: 999,
+    backgroundColor: '#ddd',
   },
   activeButton: {
     backgroundColor: '#4caf50',
   },
-  text: {
-    color: '#333',
+  icon: {
+    fontSize: 22,
   },
-  activeText: {
-    color: '#fff',
+  activeIcon: {
     fontWeight: 'bold',
+    color: '#fff',
+  },
+  lightSystem: {
+    backgroundColor: '#ffdd57',
+  },
+  darkSystem: {
+    backgroundColor: '#666',
   },
 });
