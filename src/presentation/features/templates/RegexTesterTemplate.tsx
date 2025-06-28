@@ -15,7 +15,7 @@ import { ASTTree } from '../organisms/ASTTree';
 import { MatchHighlight } from '../atoms/MatchHighlight';
 import { RegexHistoryList } from '../organisms/RegexHistoryList';
 import { HighlightedText } from '../atoms/HighlightedText';
-import { ThemeSelector } from '../components/molecules/ThemeSelector';
+import ThemeToggle from '../components/molecules/ThemeToggle';
 
 export const RegexTesterTemplate = observer(({
   inputText,
@@ -38,6 +38,8 @@ export const RegexTesterTemplate = observer(({
       style={[styles.wrapper, { backgroundColor: theme.background }]}
       contentContainerStyle={styles.content}
     >
+      <ThemeToggle />
+
       <RegexForm
         inputText={inputText}
         pattern={pattern}
@@ -75,17 +77,18 @@ export const RegexTesterTemplate = observer(({
         Total de coincidencias: {matches?.length ?? 0}
       </Text>
 
-      <Text style={[styles.resultText, { color: theme.text }]}>
-        Resultados:
-      </Text>
-
-      {matches?.map((m: string, i: number) => (
-        <MatchHighlight key={i} match={m} />
-      ))}
+      {matches?.length > 0 && (
+        <>
+          <Text style={[styles.resultText, { color: theme.text }]}>
+            Resultados:
+          </Text>
+          {matches.map((m: string, i: number) => (
+            <MatchHighlight key={i} match={m}  />
+          ))}
+        </>
+      )}
 
       {ast && <ASTTree ast={ast} textColor={theme.text} />}
-
-      <ThemeSelector />
     </ScrollView>
   );
 });
