@@ -69,7 +69,7 @@ export const RegexTesterTemplate = observer(({
         Texto con Coincidencias:
       </Text>
 
-      <HighlightedText text={inputText} indices={indices ?? []} />
+      <HighlightedText text={inputText} indices={indices ?? []} textColor={theme.text} />
 
       <Text style={[styles.countText, { color: theme.secondaryText }]}>
         Total de coincidencias: {matches?.length ?? 0}
@@ -83,7 +83,7 @@ export const RegexTesterTemplate = observer(({
         <MatchHighlight key={i} match={m} />
       ))}
 
-      {ast && <ASTTree ast={ast} />}
+      {ast && <ASTTree ast={ast} textColor={theme.text} />}
 
       <ThemeSelector />
     </ScrollView>
