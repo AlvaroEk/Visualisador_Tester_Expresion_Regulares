@@ -38,8 +38,10 @@ export const RegexTesterTemplate = observer(({
       style={[styles.wrapper, { backgroundColor: theme.background }]}
       contentContainerStyle={styles.content}
     >
+      {/* Selector de tema */}
       <ThemeToggle />
 
+      {/* Formulario principal */}
       <RegexForm
         inputText={inputText}
         pattern={pattern}
@@ -50,6 +52,7 @@ export const RegexTesterTemplate = observer(({
         flagError={flagError}
       />
 
+      {/* Botón de historial */}
       <View style={styles.section}>
         <Button
           title={showHistory ? 'Ocultar historial' : 'Mostrar historial'}
@@ -58,6 +61,7 @@ export const RegexTesterTemplate = observer(({
         />
       </View>
 
+      {/* Historial */}
       {showHistory && (
         <RegexHistoryList
           onSelect={({ pattern, flags }) => {
@@ -67,27 +71,30 @@ export const RegexTesterTemplate = observer(({
         />
       )}
 
+      {/* Texto con coincidencias */}
       <Text style={[styles.heading, { color: theme.text }]}>
         Texto con Coincidencias:
       </Text>
 
-      <HighlightedText text={inputText} indices={indices ?? []} textColor={theme.text} />
+      <HighlightedText text={inputText} indices={indices ?? []} />
 
       <Text style={[styles.countText, { color: theme.secondaryText }]}>
         Total de coincidencias: {matches?.length ?? 0}
       </Text>
 
+      {/* Solo mostrar resultados si hay coincidencias */}
       {matches?.length > 0 && (
         <>
           <Text style={[styles.resultText, { color: theme.text }]}>
             Resultados:
           </Text>
           {matches.map((m: string, i: number) => (
-            <MatchHighlight key={i} match={m}  />
+            <MatchHighlight key={i} match={m} />
           ))}
         </>
       )}
 
+      {/* AST Tree */}
       {ast && <ASTTree ast={ast} textColor={theme.text} />}
     </ScrollView>
   );

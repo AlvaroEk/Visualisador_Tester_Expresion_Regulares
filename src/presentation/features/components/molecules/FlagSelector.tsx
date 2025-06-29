@@ -1,5 +1,10 @@
 import React from 'react';
-import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
+import { View, Text, TouchableWithoutFeedback, StyleSheet } from 'react-native';
+import Animated, {
+  useSharedValue,
+  useAnimatedStyle,
+  withTiming,
+} from 'react-native-reanimated';
 
 interface Props {
   selectedFlags: string;
@@ -26,10 +31,21 @@ export const FlagSelector = ({ selectedFlags, onChange, invalidFlags = [], dark 
         const selected = selectedFlags.includes(flag);
         const invalid = invalidFlags.includes(flag);
 
+        const scale = useSharedValue(1);
+        const animatedStyle = useAnimatedStyle(() => ({
+          transform: [{ scale: withTiming(scale.value, { duration: 200 }) }],
+        }));
+
+        const onPress = () => {
+          scale.value = 1.2;
+          toggleFlag(flag);
+          setTimeout(() => (scale.value = 1), 200);
+        };
+
         const backgroundColor = selected
           ? dark
-            ? '#2196f3' // Azul vivo en modo oscuro
-            : '#007bff' // Azul más suave en claro
+            ? '#2196f3'
+            : '#007bff'
           : dark
           ? '#444'
           : '#eee';
@@ -41,13 +57,17 @@ export const FlagSelector = ({ selectedFlags, onChange, invalidFlags = [], dark 
           : '#000';
 
         return (
-          <TouchableOpacity
-            key={flag}
-            onPress={() => toggleFlag(flag)}
-            style={[styles.flag, { backgroundColor, borderColor: invalid ? 'red' : 'transparent' }]}
-          >
-            <Text style={[styles.flagText, { color }]}>{flag}</Text>
-          </TouchableOpacity>
+          <TouchableWithoutFeedback key={flag} onPress={onPress}>
+            <Animated.View
+              style={[
+                styles.flag,
+                { backgroundColor, borderColor: invalid ? 'red' : 'transparent' },
+                animatedStyle,
+              ]}
+            >
+              <Text style={[styles.flagText, { color }]}>{flag}</Text>
+            </Animated.View>
+          </TouchableWithoutFeedback>
         );
       })}
     </View>
