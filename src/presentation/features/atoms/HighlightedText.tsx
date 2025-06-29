@@ -1,15 +1,21 @@
 import React from 'react';
 import { Text } from 'react-native';
+import { themeStore } from '../../store/themeStore';
 
 interface Props {
   text: string;
   indices: [number, number][];
-  textColor?: string; 
+  textColor?: string;
 }
 
-export const HighlightedText: React.FC<Props> = ({ text, indices, textColor = '#000' }) => {
+export const HighlightedText: React.FC<Props> = ({ text, indices, textColor }) => {
+  const isDark = themeStore.resolvedMode === 'dark';
+  const baseTextColor = textColor ?? (isDark ? '#fff' : '#000');
+  const highlightBg = '#feeb9b'; // Amarillo claro
+  const highlightTextColor = '#000'; // Siempre legible sobre amarillo
+
   if (!indices || indices.length === 0) {
-    return <Text style={{ color: textColor }}>{text}</Text>;
+    return <Text style={{ color: baseTextColor }}>{text}</Text>;
   }
 
   const parts: React.ReactNode[] = [];
@@ -18,7 +24,7 @@ export const HighlightedText: React.FC<Props> = ({ text, indices, textColor = '#
   indices.forEach(([start, end], i) => {
     if (lastIndex < start) {
       parts.push(
-        <Text key={`normal-${i}`} style={{ color: textColor }}>
+        <Text key={`normal-${i}`} style={{ color: baseTextColor }}>
           {text.slice(lastIndex, start)}
         </Text>
       );
@@ -28,8 +34,8 @@ export const HighlightedText: React.FC<Props> = ({ text, indices, textColor = '#
       <Text
         key={`highlight-${i}`}
         style={{
-          backgroundColor: '#ffeeaa',
-          color: '#000', // Coincidencia resaltada
+          backgroundColor: highlightBg,
+          color: highlightTextColor,
           fontWeight: 'bold',
         }}
       >
@@ -42,7 +48,7 @@ export const HighlightedText: React.FC<Props> = ({ text, indices, textColor = '#
 
   if (lastIndex < text.length) {
     parts.push(
-      <Text key="last" style={{ color: textColor }}>
+      <Text key="last" style={{ color: baseTextColor }}>
         {text.slice(lastIndex)}
       </Text>
     );
