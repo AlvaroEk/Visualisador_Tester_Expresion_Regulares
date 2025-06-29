@@ -1,6 +1,6 @@
 import React from 'react';
 import { Text } from 'react-native';
-import { themeStore } from '../../store/themeStore';
+import { themeStore } from '../../../store/themeStore';
 
 interface Props {
   text: string;

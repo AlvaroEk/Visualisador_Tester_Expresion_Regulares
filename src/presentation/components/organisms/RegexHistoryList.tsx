@@ -7,8 +7,8 @@ import {
 } from 'react-native';
 import { RegexHistoryService } from '../../../services/regexHistoryService';
 import { observer } from 'mobx-react-lite';
-import { themeStore } from '../../store/themeStore';
-import { Colors } from '../../theme/colors';
+import { themeStore } from '../../../store/themeStore';
+import { Colors } from '../../../theme/colors';
 
 interface Props {
   onSelect: (item: { pattern: string; flags: string }) => void;

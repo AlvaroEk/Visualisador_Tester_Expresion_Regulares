@@ -10,11 +10,11 @@ import { observer } from 'mobx-react-lite';
 import { themeStore } from '../../store/themeStore';
 import { Colors } from '../../theme/colors';
 
-import { RegexForm } from '../organisms/RegexForm';
-import { ASTTree } from '../organisms/ASTTree';
-import { MatchHighlight } from '../atoms/MatchHighlight';
-import { RegexHistoryList } from '../organisms/RegexHistoryList';
-import { HighlightedText } from '../atoms/HighlightedText';
+import { RegexForm } from '../components/organisms/RegexForm';
+import { ASTTree } from '../components/organisms/ASTTree';
+import { MatchHighlight } from '../components/atoms/MatchHighlight';
+import { RegexHistoryList } from '../components/organisms/RegexHistoryList';
+import { HighlightedText } from '../components/atoms/HighlightedText';
 import ThemeToggle from '../components/molecules/ThemeToggle';
 
 export const RegexTesterTemplate = observer(({

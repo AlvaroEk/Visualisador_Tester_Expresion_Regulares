@@ -1,9 +1,9 @@
 import React, { useState } from 'react';
 import { View, Text, TouchableOpacity, StyleSheet } from 'react-native';
-import { InputWithLabel } from '../components/molecules/InputWithLabel';
-import { FlagSelector } from '../components/molecules/FlagSelector';
+import { InputWithLabel } from '../../components/molecules/InputWithLabel';
+import { FlagSelector } from '../../components/molecules/FlagSelector';
 import { observer } from 'mobx-react-lite';
-import { themeStore } from '../../store/themeStore';
+import { themeStore } from '../../../store/themeStore';
 
 interface Props {
   inputText: string;

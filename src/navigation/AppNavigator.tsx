@@ -1,7 +1,7 @@
 import React from 'react';
 import { NavigationContainer } from '@react-navigation/native';
 import { createNativeStackNavigator } from '@react-navigation/native-stack';
-import { RegexTesterScreen } from '../presentation/features/screens/pages/RegexTesterScreen';
+import { RegexTesterScreen } from '../presentation/screens/pages/RegexTesterScreen';
 
 export type RootStackParamList = {
   RegexTester: undefined;

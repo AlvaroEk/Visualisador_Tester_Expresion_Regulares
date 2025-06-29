@@ -1,10 +1,10 @@
 import React from 'react';
 import { observer } from 'mobx-react-lite';
 import { RegexTesterTemplate } from '../../templates/RegexTesterTemplate';
-import { RegexTesterViewModel } from '../../regexTester/viewmodels/RegexTesterViewModel';
-import { ParseRegexUseCase } from '../../../../domain/usecases/ParseRegexUseCase';
-import { RegexRepositoryImpl } from '../../../../data/repositories_impl/RegexRepositoryImpl';
-import { RegexParserDataSource } from '../../../../data/datasources/RegexParserDataSource';
+import { RegexTesterViewModel } from '../../features/regexTester/viewmodels/RegexTesterViewModel';
+import { ParseRegexUseCase } from '../../../domain/usecases/ParseRegexUseCase';
+import { RegexRepositoryImpl } from '../../../data/repositories_impl/RegexRepositoryImpl';
+import { RegexParserDataSource } from '../../../data/datasources/RegexParserDataSource';
 
 const dataSource = new RegexParserDataSource();
 const repository = new RegexRepositoryImpl(dataSource);
