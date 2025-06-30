@@ -49,7 +49,7 @@ export const RegexForm = observer(({
       />
 
       <Text style={[styles.label, isDark && styles.labelDark]}>
-        🏷️ Selecciona los flags de la expresión regular:
+        Selecciona los flags de la expresión regular:
       </Text>
 
       <FlagSelector

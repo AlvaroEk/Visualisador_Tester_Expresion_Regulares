@@ -34,7 +34,7 @@ const ThemeToggle = observer(() => {
 
   const thumbTranslate = thumbAnim.interpolate({
     inputRange: [0, 1, 2],
-    outputRange: [4, 50, 90], // Ajustado al tamaño del contenedor
+    outputRange: [4, 50, 90], 
   });
 
   return (
