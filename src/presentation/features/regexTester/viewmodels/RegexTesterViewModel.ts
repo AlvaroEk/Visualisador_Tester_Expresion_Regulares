@@ -1,61 +1,66 @@
-import { makeAutoObservable } from 'mobx';
-import { RegexExpression } from '../../../../domain/entities/RegexExpression';
+import { makeAutoObservable, runInAction } from 'mobx';
 import { MatchResult } from '../../../../domain/entities/MatchResult';
 import { ParseRegexUseCase } from '../../../../domain/usecases/ParseRegexUseCase';
-import { RegexHistoryService } from '../../../../services/regexHistoryService';
+import { useHistoryStore } from '../../../../store/historyStore';
+import { RegexExpression } from '../../../../domain/entities/RegexExpression';
 
 export class RegexTesterViewModel {
-  inputText: string = '';
-  pattern: string = '';
-  flags: string = '';
+  inputText = '';
+  pattern = '';
+  flags = '';
   result: MatchResult | null = null;
   flagError: string | null = null;
 
-  constructor(private parseRegexUseCase: ParseRegexUseCase) {
+  constructor(private readonly useCase: ParseRegexUseCase) {
     makeAutoObservable(this);
+    useHistoryStore.getState().loadHistory(); // Cargar historial al iniciar
   }
 
-  setInputText(text: string) {
-    this.inputText = text;
-    this.tryParse();
-  }
-
-  setPattern(pattern: string) {
-    this.pattern = pattern;
-    this.tryParse();
-  }
-
-  setFlags(flags: string) {
-    this.flags = flags;
-    this.tryParse();
-  }
-
-  private async tryParse() {
-    const validFlags = 'gimsuy';
-    const invalid = this.flags.split('').filter(f => !validFlags.includes(f));
-
-    if (invalid.length > 0) {
-      this.flagError = `Flags inválidos: ${invalid.join(', ')}`;
-      this.result = null;
-      return;
-    } else {
-      this.flagError = null;
-    }
-
+  async runRegex() {
     try {
       const expression: RegexExpression = {
         pattern: this.pattern,
         flags: this.flags,
       };
 
-      const parsed = this.parseRegexUseCase.execute(this.inputText, expression);
-      this.result = parsed;
+      const result = this.useCase.execute(this.inputText, expression);
 
-      // Guarda en historial
-      await RegexHistoryService.saveExpression(this.pattern, this.flags);
-    } catch (error) {
-      this.result = null;
-      console.warn('Error al analizar expresión:', error);
+      runInAction(() => {
+        this.result = result;
+        this.flagError = null;
+      });
+
+      if (this.pattern && this.inputText) {
+        await useHistoryStore.getState().addHistory(this.pattern, this.inputText, this.flags);
+      }
+    } catch (err) {
+      runInAction(() => {
+        this.flagError = (err as Error).message;
+      });
     }
+  }
+
+  setInputText(value: string) {
+    this.inputText = value;
+    this.debouncedRun();
+  }
+
+  setPattern(value: string) {
+    this.pattern = value;
+    this.debouncedRun();
+  }
+
+  setFlags(value: string) {
+    this.flags = value;
+    this.debouncedRun();
+  }
+
+  // ✅ Evita ejecutar el parser en cada pulsación, opcional
+  private debounceTimer: NodeJS.Timeout | null = null;
+  private debouncedRun() {
+    if (this.debounceTimer) clearTimeout(this.debounceTimer);
+    this.debounceTimer = setTimeout(() => {
+      this.runRegex();
+    }, 300);
   }
 }
