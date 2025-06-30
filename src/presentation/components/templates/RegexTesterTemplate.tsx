@@ -8,14 +8,14 @@ import {
   ListRenderItem,
 } from 'react-native';
 import { observer } from 'mobx-react-lite';
-import { themeStore } from '../../store/themeStore';
-import { Colors } from '../../theme/colors';
+import { themeStore } from '../../../store/themeStore';
+import { Colors } from '../../../theme/colors';
 
-import { RegexForm } from '../components/organisms/RegexForm';
-import { ASTTree } from '../components/organisms/ASTTree';
-import { MatchHighlight } from '../components/atoms/MatchHighlight';
-import { HighlightedText } from '../components/atoms/HighlightedText';
-import ThemeToggle from '../components/molecules/ThemeToggle';
+import { RegexForm } from '../organisms/RegexForm';
+import { ASTTree } from '../organisms/ASTTree';
+import { MatchHighlight } from '../atoms/MatchHighlight';
+import { HighlightedText } from '../atoms/HighlightedText';
+import ThemeToggle from '../molecules/ThemeToggle';
 
 interface Props {
   inputText: string;
@@ -29,7 +29,7 @@ interface Props {
   onPatternChange: (text: string) => void;
   onFlagsChange: (text: string) => void;
   onOpenHistory: () => void;
-  onExportAST: (ast: any) => Promise<void>; // ✅ SE AÑADE ESTA PROP
+  onExportAST: (ast: any) => Promise<void>; 
 }
 
 export const RegexTesterTemplate = observer(({
@@ -44,7 +44,7 @@ export const RegexTesterTemplate = observer(({
   flagError,
   indices,
   onOpenHistory,
-  onExportAST, // ✅ SE USA
+  onExportAST, 
 }: Props) => {
   const isDark = themeStore.resolvedMode === 'dark';
   const theme = isDark ? Colors.dark : Colors.light;

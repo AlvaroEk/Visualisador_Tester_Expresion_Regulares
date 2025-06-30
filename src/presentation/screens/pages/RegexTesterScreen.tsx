@@ -11,7 +11,7 @@ import { RegexTesterViewModel } from '../../features/regexTester/viewmodels/Rege
 import { RegexParserDataSource } from '../../../data/datasources/RegexParserDataSource';
 import { RegexRepositoryImpl } from '../../../data/repositories_impl/RegexRepositoryImpl';
 import { ParseRegexUseCase } from '../../../domain/usecases/ParseRegexUseCase';
-import { RegexTesterTemplate } from '../../templates/RegexTesterTemplate';
+import { RegexTesterTemplate } from '../../components/templates/RegexTesterTemplate';
 
 export const RegexTesterScreen = observer(() => {
   const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
