@@ -29,6 +29,7 @@ interface Props {
   onPatternChange: (text: string) => void;
   onFlagsChange: (text: string) => void;
   onOpenHistory: () => void;
+  onExportAST: (ast: any) => Promise<void>; // ✅ SE AÑADE ESTA PROP
 }
 
 export const RegexTesterTemplate = observer(({
@@ -43,6 +44,7 @@ export const RegexTesterTemplate = observer(({
   flagError,
   indices,
   onOpenHistory,
+  onExportAST, // ✅ SE USA
 }: Props) => {
   const isDark = themeStore.resolvedMode === 'dark';
   const theme = isDark ? Colors.dark : Colors.light;
@@ -72,7 +74,6 @@ export const RegexTesterTemplate = observer(({
             flagError={flagError}
           />
 
-          {/* Botón de historial completo */}
           <View style={styles.section}>
             <Button title="Ver historial completo" onPress={onOpenHistory} color={theme.chipActive} />
           </View>
@@ -91,6 +92,16 @@ export const RegexTesterTemplate = observer(({
             <Text style={[styles.resultText, { color: theme.text }]}>
               Resultados:
             </Text>
+          )}
+
+          {ast && (
+            <View style={styles.section}>
+              <Button
+                title="Exportar AST"
+                onPress={() => onExportAST(ast)}
+                color={theme.accent}
+              />
+            </View>
           )}
         </View>
       }

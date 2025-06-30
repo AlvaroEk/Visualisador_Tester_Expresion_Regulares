@@ -2,6 +2,9 @@ import React, { useMemo } from 'react';
 import { useRoute, useFocusEffect, RouteProp, useNavigation } from '@react-navigation/native';
 import { observer } from 'mobx-react-lite';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
+import * as FileSystem from 'expo-file-system';
+import * as Sharing from 'expo-sharing';
+import { Alert } from 'react-native';
 
 import { RootStackParamList } from '../../../navigation/AppNavigator';
 import { RegexTesterViewModel } from '../../features/regexTester/viewmodels/RegexTesterViewModel';
@@ -30,6 +33,61 @@ export const RegexTesterScreen = observer(() => {
     }, [route.params])
   );
 
+  const exportAST = async (ast: any) => {
+  try {
+    const json = JSON.stringify(ast, null, 2);
+    const now = new Date();
+    const datePart = now.toISOString().slice(0, 10).replace(/-/g, '');
+    const timePart = now.toTimeString().slice(0, 5).replace(':', '');
+    const filename = `regex_ast_${datePart}_${timePart}.json`;
+    const folder = FileSystem.documentDirectory + 'ASTs/';
+    const path = folder + filename;
+
+    // Crear carpeta si no existe
+    const folderInfo = await FileSystem.getInfoAsync(folder);
+    if (!folderInfo.exists) {
+      await FileSystem.makeDirectoryAsync(folder, { intermediates: true });
+    }
+
+    Alert.alert(
+      'Exportar AST',
+      '¿Qué deseas hacer con el archivo?',
+      [
+        {
+          text: 'Cancelar',
+          style: 'cancel',
+        },
+        {
+          text: 'Guardar localmente',
+          onPress: async () => {
+            await FileSystem.writeAsStringAsync(path, json, {
+              encoding: FileSystem.EncodingType.UTF8,
+            });
+            Alert.alert('Guardado', `Archivo guardado localmente en:\nASTs/${filename}`);
+          },
+        },
+        {
+          text: 'Compartir',
+          onPress: async () => {
+            await FileSystem.writeAsStringAsync(path, json, {
+              encoding: FileSystem.EncodingType.UTF8,
+            });
+            if (await Sharing.isAvailableAsync()) {
+              await Sharing.shareAsync(path);
+            } else {
+              Alert.alert('Error', 'Compartir no está disponible en este dispositivo');
+            }
+          },
+        },
+      ],
+      { cancelable: true }
+    );
+  } catch (error) {
+    console.error(error);
+    Alert.alert('Error', 'No se pudo exportar el AST');
+  }
+};
+
   return (
     <RegexTesterTemplate
       inputText={viewModel.inputText}
@@ -43,6 +101,7 @@ export const RegexTesterScreen = observer(() => {
       onPatternChange={viewModel.setPattern.bind(viewModel)}
       onFlagsChange={viewModel.setFlags.bind(viewModel)}
       onOpenHistory={() => navigation.navigate('History')}
+      onExportAST={exportAST} 
     />
   );
 });
