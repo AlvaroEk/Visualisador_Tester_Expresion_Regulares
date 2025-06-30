@@ -9,6 +9,7 @@ export const Colors = {
     chip: '#e0e0e0',
     chipActive: '#007bff',
     surface: '#f8f8f8',
+    card: '#f2f2f2',
   },
   dark: {
     background: '#0f0f0f',
@@ -20,5 +21,6 @@ export const Colors = {
     chip: '#1e1e1e',
     chipActive: '#00bfff',
     surface: '#181818',
+    card: '#222222',
   },
 };

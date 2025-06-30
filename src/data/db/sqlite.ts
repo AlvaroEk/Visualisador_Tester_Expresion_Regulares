@@ -48,9 +48,19 @@ export const insertHistory = async (
   }
 };
 
+// Obtiene el historial ordenado
 export const fetchHistory = async (): Promise<RegexHistoryItem[]> => {
-  const result = await db.getAllAsync<RegexHistoryItem>(
+  return await db.getAllAsync<RegexHistoryItem>(
     'SELECT * FROM history ORDER BY timestamp DESC'
   );
-  return result;
+};
+
+// Elimina una entrada por ID
+export const deleteHistoryItem = async (id: number): Promise<void> => {
+  await db.runAsync('DELETE FROM history WHERE id = ?', id);
+};
+
+// 🧹 Elimina todo el historial
+export const deleteAllHistory = async (): Promise<void> => {
+  await db.runAsync('DELETE FROM history');
 };
