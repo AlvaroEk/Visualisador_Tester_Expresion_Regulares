@@ -1,6 +1,4 @@
-// Importa React
 import React from 'react';
-// Importa componentes de UI desde React Native
 import {
   FlatList,
   Text,
@@ -9,21 +7,16 @@ import {
   StyleSheet,
   ListRenderItem,
 } from 'react-native';
-// Importa MobX observer para que el componente reaccione a cambios del estado global
 import { observer } from 'mobx-react-lite';
-// Importa el store que gestiona el modo claro/oscuro
 import { themeStore } from '../../../store/themeStore';
-// Importa los colores asociados a los temas
 import { Colors } from '../../../theme/colors';
 
-// Importa componentes UI del proyecto
 import { RegexForm } from '../organisms/RegexForm';
 import { ASTTree } from '../organisms/ASTTree';
 import { MatchHighlight } from '../atoms/MatchHighlight';
 import { HighlightedText } from '../atoms/HighlightedText';
 import ThemeToggle from '../molecules/ThemeToggle';
 
-// Define la interfaz de propiedades que recibe el componente
 interface Props {
   inputText: string;
   pattern: string;
@@ -37,10 +30,10 @@ interface Props {
   onFlagsChange: (text: string) => void;
   onOpenHistory: () => void;
   onExportAST: (ast: any) => Promise<void>;
-  onOpenDiagram: () => void; 
+  onOpenDiagram: () => void;
+  onOpenRailroad: () => void; 
 }
 
-// Componente principal que actúa como plantilla visual para el analizador
 export const RegexTesterTemplate = observer(({
   inputText,
   pattern,
@@ -54,7 +47,8 @@ export const RegexTesterTemplate = observer(({
   indices,
   onOpenHistory,
   onExportAST,
-  onOpenDiagram, 
+  onOpenDiagram,
+  onOpenRailroad, 
 }: Props) => {
   const isDark = themeStore.resolvedMode === 'dark';
   const theme = isDark ? Colors.dark : Colors.light;
@@ -118,12 +112,19 @@ export const RegexTesterTemplate = observer(({
                 />
               </View>
 
-              {/* Botón para abrir diagrama AST */}
               <View style={styles.section}>
                 <Button
                   title="Ver Diagrama AST"
                   onPress={onOpenDiagram}
                   color={theme.primary}
+                />
+              </View>
+
+              <View style={styles.section}>
+                <Button
+                  title="Ver Diagrama de Ferrocarril"
+                  onPress={onOpenRailroad}
+                  color={theme.warning}
                 />
               </View>
             </>
@@ -135,7 +136,6 @@ export const RegexTesterTemplate = observer(({
   );
 });
 
-// Estilos del componente
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,

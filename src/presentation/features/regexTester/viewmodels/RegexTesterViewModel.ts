@@ -70,7 +70,7 @@ export class RegexTesterViewModel {
     }, 300);
   }
 
-  // ✅ Genera un árbol jerárquico tipo organigrama (sin letras sueltas)
+  // Genera un árbol jerárquico tipo organigrama (sin letras sueltas)
   getVisualASTNodes() {
     if (!this.result?.ast) return { nodes: [], connections: [] };
 

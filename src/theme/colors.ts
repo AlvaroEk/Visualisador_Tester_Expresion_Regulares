@@ -13,6 +13,7 @@ export const Colors = {
     surface: '#f8f8f8',          // Fondo de superficies o tarjetas (gris casi blanco)
     card: '#f2f2f2',             // Fondo de tarjetas (gris claro)
     primary: '#2980b9',
+    warning: '#ffa726',
   },
   // Colores usados cuando el tema es oscuro
   dark: {
@@ -27,5 +28,6 @@ export const Colors = {
     surface: '#181818',          // Fondo de superficies o tarjetas (gris muy oscuro)
     card: '#222222',             // Fondo de tarjetas (gris oscuro)
     primary: '#3498db',
+    warning: '#ffcc80',
   },
 };

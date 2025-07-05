@@ -1,5 +1,3 @@
-// RegexTesterScreen.tsx
-
 import React, { useMemo } from 'react';
 import { useRoute, useFocusEffect, RouteProp, useNavigation } from '@react-navigation/native';
 import { observer } from 'mobx-react-lite';
@@ -90,6 +88,15 @@ export const RegexTesterScreen = observer(() => {
     navigation.navigate('ASTDiagram', { nodes, connections });
   };
 
+  const goToRailroad = () => {
+    const expression = viewModel.pattern;
+    if (!expression) {
+      Alert.alert('Expresión vacía', 'Por favor, ingresa una expresión regular.');
+      return;
+    }
+    navigation.navigate('RailroadDiagram', { pattern: expression });
+  };
+
   return (
     <RegexTesterTemplate
       inputText={viewModel.inputText}
@@ -104,7 +111,8 @@ export const RegexTesterScreen = observer(() => {
       onFlagsChange={viewModel.setFlags.bind(viewModel)}
       onOpenHistory={() => navigation.navigate('History')}
       onExportAST={exportAST}
-      onOpenDiagram={goToDiagram} 
+      onOpenDiagram={goToDiagram}
+      onOpenRailroad={goToRailroad} 
     />
   );
 });

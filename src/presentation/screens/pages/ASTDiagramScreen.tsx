@@ -3,22 +3,26 @@ import { ScrollView, View, StyleSheet, useWindowDimensions } from 'react-native'
 import { observer } from 'mobx-react-lite';
 import { useRoute } from '@react-navigation/native';
 import ASTDiagram from '../../components/organisms/ASTDiagram';
+import { themeStore } from '../../../store/themeStore';
 
 const ASTDiagramScreen = observer(() => {
   const route = useRoute();
   const { width } = useWindowDimensions();
-
   const { nodes, connections } = route.params as {
     nodes: { id: string; label: string; x: number; y: number }[];
     connections: { from: string; to: string }[];
   };
 
-  // Calculamos dimensiones máximas del contenido
   const maxX = Math.max(...nodes.map(n => n.x)) + 300;
   const maxY = Math.max(...nodes.map(n => n.y)) + 300;
 
+  const isDarkMode = themeStore.resolvedMode === 'dark';
+
+  // ✅ Fondo de pantalla según el modo
+  const backgroundColor = isDarkMode ? '#0f172a' : '#d9eaff';
+
   return (
-    <View style={styles.fullScreen}>
+    <View style={[styles.fullScreen, { backgroundColor }]}>
       <ScrollView
         horizontal
         showsHorizontalScrollIndicator={true}
@@ -38,7 +42,6 @@ const ASTDiagramScreen = observer(() => {
 const styles = StyleSheet.create({
   fullScreen: {
     flex: 1,
-    backgroundColor: '#f0f2f5',
   },
 });
 
