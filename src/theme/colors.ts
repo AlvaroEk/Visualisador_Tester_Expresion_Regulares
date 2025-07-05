@@ -12,6 +12,7 @@ export const Colors = {
     chipActive: '#007bff',       // Fondo de chips activos o destacados (azul)
     surface: '#f8f8f8',          // Fondo de superficies o tarjetas (gris casi blanco)
     card: '#f2f2f2',             // Fondo de tarjetas (gris claro)
+    primary: '#2980b9',
   },
   // Colores usados cuando el tema es oscuro
   dark: {
@@ -25,5 +26,6 @@ export const Colors = {
     chipActive: '#00bfff',       // Fondo de chips activos o destacados (azul claro)
     surface: '#181818',          // Fondo de superficies o tarjetas (gris muy oscuro)
     card: '#222222',             // Fondo de tarjetas (gris oscuro)
+    primary: '#3498db',
   },
 };
