@@ -1,5 +1,10 @@
 import React, { useMemo } from 'react';
-import { useRoute, useFocusEffect, RouteProp, useNavigation } from '@react-navigation/native';
+import {
+  useRoute,
+  useFocusEffect,
+  RouteProp,
+  useNavigation,
+} from '@react-navigation/native';
 import { observer } from 'mobx-react-lite';
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
 import * as FileSystem from 'expo-file-system';
@@ -14,7 +19,8 @@ import { ParseRegexUseCase } from '../../../domain/usecases/ParseRegexUseCase';
 import { RegexTesterTemplate } from '../../components/templates/RegexTesterTemplate';
 
 export const RegexTesterScreen = observer(() => {
-  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation =
+    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, 'RegexTester'>>();
 
   const viewModel = useMemo(() => {
@@ -34,6 +40,11 @@ export const RegexTesterScreen = observer(() => {
   );
 
   const exportAST = async (ast: any) => {
+    if (!ast) {
+      Alert.alert('AST vacío', 'No se ha generado el AST para exportar.');
+      return;
+    }
+
     try {
       const json = JSON.stringify(ast, null, 2);
       const now = new Date();
@@ -68,7 +79,10 @@ export const RegexTesterScreen = observer(() => {
             if (await Sharing.isAvailableAsync()) {
               await Sharing.shareAsync(path);
             } else {
-              Alert.alert('Error', 'Compartir no está disponible en este dispositivo');
+              Alert.alert(
+                'Error',
+                'Compartir no está disponible en este dispositivo'
+              );
             }
           },
         },
@@ -80,18 +94,36 @@ export const RegexTesterScreen = observer(() => {
   };
 
   const goToDiagram = () => {
-    const { nodes, connections } = viewModel.getVisualASTNodes();
-    if (nodes.length === 0) {
-      Alert.alert('AST vacío', 'No se ha generado el AST aún.');
-      return;
+    try {
+      const { nodes, connections } = viewModel.getVisualASTNodes();
+
+      if (nodes.length === 0) {
+        Alert.alert('AST vacío', 'No se ha generado un AST visualizable.');
+        return;
+      }
+
+      if (nodes.length > 250) {
+        Alert.alert(
+          'AST demasiado complejo',
+          'Este árbol contiene más de 250 nodos y podría cerrar la app. Intenta simplificar la expresión.'
+        );
+        return;
+      }
+
+      navigation.navigate('ASTDiagram', { nodes, connections });
+    } catch (error) {
+      console.error(error);
+      Alert.alert('Error', 'No se pudo generar el diagrama AST.');
     }
-    navigation.navigate('ASTDiagram', { nodes, connections });
   };
 
   const goToRailroad = () => {
     const expression = viewModel.pattern;
     if (!expression) {
-      Alert.alert('Expresión vacía', 'Por favor, ingresa una expresión regular.');
+      Alert.alert(
+        'Expresión vacía',
+        'Por favor, ingresa una expresión regular.'
+      );
       return;
     }
     navigation.navigate('RailroadDiagram', { pattern: expression });
@@ -110,9 +142,9 @@ export const RegexTesterScreen = observer(() => {
       onPatternChange={viewModel.setPattern.bind(viewModel)}
       onFlagsChange={viewModel.setFlags.bind(viewModel)}
       onOpenHistory={() => navigation.navigate('History')}
-      onExportAST={exportAST}
+      onExportAST={() => exportAST(viewModel.result?.ast)}
       onOpenDiagram={goToDiagram}
-      onOpenRailroad={goToRailroad} 
+      onOpenRailroad={goToRailroad}
     />
   );
 });

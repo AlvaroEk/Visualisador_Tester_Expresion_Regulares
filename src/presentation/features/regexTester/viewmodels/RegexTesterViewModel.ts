@@ -70,7 +70,6 @@ export class RegexTesterViewModel {
     }, 300);
   }
 
-  // Genera un árbol jerárquico tipo organigrama (sin letras sueltas)
   getVisualASTNodes() {
     if (!this.result?.ast) return { nodes: [], connections: [] };
 
@@ -79,6 +78,9 @@ export class RegexTesterViewModel {
 
     let nodeId = 0;
     const levelMap: Record<number, number> = {};
+    const visited = new Set();
+    const MAX_DEPTH = 30;
+    const MAX_NODES = 300;
 
     const traverse = (
       node: any,
@@ -86,8 +88,11 @@ export class RegexTesterViewModel {
       parentId: string | null = null
     ) => {
       if (!node || typeof node !== 'object') return;
+      if (visited.has(node)) return;
+      if (depth > MAX_DEPTH || visualNodes.length >= MAX_NODES) return;
 
-      // Excluir caracteres individuales
+      visited.add(node);
+
       if (node.type === 'character' || node.type === 'literal') return;
 
       const id = `node-${nodeId++}`;
@@ -100,11 +105,7 @@ export class RegexTesterViewModel {
       levelMap[depth]++;
 
       const label =
-        node.raw ||
-        node.pattern ||
-        node.value ||
-        node.type ||
-        'Nodo';
+        node.raw || node.pattern || node.value || node.type || 'Nodo';
 
       visualNodes.push({ id, label, x, y });
 
@@ -113,7 +114,9 @@ export class RegexTesterViewModel {
       }
 
       if (Array.isArray(node.children)) {
-        node.children.forEach((child: any) => traverse(child, depth + 1, id));
+        node.children.forEach((child: any) =>
+          traverse(child, depth + 1, id)
+        );
       } else if (node.left || node.right) {
         if (node.left) traverse(node.left, depth + 1, id);
         if (node.right) traverse(node.right, depth + 1, id);

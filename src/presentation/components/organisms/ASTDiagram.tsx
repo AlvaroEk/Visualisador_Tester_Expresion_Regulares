@@ -1,6 +1,6 @@
 import React from 'react';
 import Svg from 'react-native-svg';
-import { View } from 'react-native';
+import { View, Text } from 'react-native';
 import { observer } from 'mobx-react-lite';
 import { themeStore } from '../../../store/themeStore';
 import ASTNode from '../atoms/ASTNode';
@@ -21,8 +21,35 @@ const ASTDiagram: React.FC<Props> = observer(({ nodes, connections }) => {
   const spacingX = 20;
   const spacingY = 30;
 
-  const width = Math.max(...nodes.map((n) => n.x + spacingX)) + padding;
-  const height = Math.max(...nodes.map((n) => n.y + spacingY)) + padding;
+  const MAX_SVG_DIMENSION = 5000;
+  const MAX_NODES_ALLOWED = 300;
+
+  // Si hay demasiados nodos, muestra advertencia en lugar de intentar renderizar
+  if (!Array.isArray(nodes) || nodes.length === 0) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', backgroundColor: isDarkMode ? '#0f172a' : '#e3f2fd' }}>
+        <Text style={{ color: isDarkMode ? '#fff' : '#000', fontSize: 16 }}>
+          No hay nodos para mostrar.
+        </Text>
+      </View>
+    );
+  }
+
+  if (nodes.length > MAX_NODES_ALLOWED) {
+    return (
+      <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center', padding: 20, backgroundColor: isDarkMode ? '#0f172a' : '#e3f2fd' }}>
+        <Text style={{ color: '#f00', fontSize: 16, textAlign: 'center' }}>
+          El diagrama AST es demasiado grande para renderizar (más de {MAX_NODES_ALLOWED} nodos).
+          {"\n"}Por favor, exporta el AST o usa una expresión más sencilla.
+        </Text>
+      </View>
+    );
+  }
+
+  const rawWidth = Math.max(...nodes.map((n) => n.x + spacingX)) + padding;
+  const rawHeight = Math.max(...nodes.map((n) => n.y + spacingY)) + padding;
+  const width = Math.min(rawWidth, MAX_SVG_DIMENSION);
+  const height = Math.min(rawHeight, MAX_SVG_DIMENSION);
 
   const backgroundColor = isDarkMode ? '#0f172a' : '#e3f2fd';
   const gridColor = isDarkMode ? '#1e293b' : '#bbdefb';
@@ -39,7 +66,10 @@ const ASTDiagram: React.FC<Props> = observer(({ nodes, connections }) => {
         {connections.map((conn, index) => {
           const from = nodes.find((n) => n.id === conn.from);
           const to = nodes.find((n) => n.id === conn.to);
-          if (!from || !to) return null;
+          if (!from || !to) {
+            console.warn(`Conexión inválida ignorada: ${conn.from} -> ${conn.to}`);
+            return null;
+          }
 
           return (
             <ASTConnection
@@ -56,6 +86,8 @@ const ASTDiagram: React.FC<Props> = observer(({ nodes, connections }) => {
         })}
 
         {nodes.map((node) => {
+          if (!node || typeof node.x !== 'number' || typeof node.y !== 'number') return null;
+
           const textLength = node.label.length;
           const baseRadius = 36;
           const maxRadius = 55;
@@ -76,7 +108,7 @@ const ASTDiagram: React.FC<Props> = observer(({ nodes, connections }) => {
               fontSize={fontSize}
               fill={`url(#${gradientId})`}
               stroke={strokeColor}
-              textColor={textColor} 
+              textColor={textColor}
             />
           );
         })}

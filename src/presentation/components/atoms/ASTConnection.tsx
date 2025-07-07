@@ -21,11 +21,22 @@ const ASTConnection: React.FC<ASTConnectionProps> = ({
   pathColor,
   textColor,
 }) => {
+  // Validación básica
+  if (
+    !from || !to ||
+    typeof from.x !== 'number' || typeof from.y !== 'number' ||
+    typeof to.x !== 'number' || typeof to.y !== 'number'
+  ) {
+    console.warn(`Conexión inválida ignorada: ${connection?.from} -> ${connection?.to}`);
+    return null;
+  }
+
   const fromX = from.x + spacingX;
   const fromY = from.y + spacingY;
   const toX = to.x + spacingX;
   const toY = to.y + spacingY;
   const midX = (fromX + toX) / 2;
+  const midY = (fromY + toY) / 2;
 
   return (
     <G>
@@ -39,12 +50,14 @@ const ASTConnection: React.FC<ASTConnectionProps> = ({
       {connection.label && (
         <SvgText
           x={midX}
-          y={(fromY + toY) / 2 - 10}
-          fontSize="10"
+          y={midY - 10}
+          fontSize={10}
           fill={textColor}
           textAnchor="middle"
         >
-          {connection.label}
+          {connection.label.length > 30
+            ? connection.label.slice(0, 27) + '...'
+            : connection.label}
         </SvgText>
       )}
     </G>
