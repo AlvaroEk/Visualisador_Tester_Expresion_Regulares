@@ -1,3 +1,4 @@
+// Importaciones de React y hooks de navegación
 import React, { useMemo } from 'react';
 import {
   useRoute,
@@ -5,12 +6,13 @@ import {
   RouteProp,
   useNavigation,
 } from '@react-navigation/native';
-import { observer } from 'mobx-react-lite';
+import { observer } from 'mobx-react-lite'; // Para observar cambios de MobX en la UI
 import { NativeStackNavigationProp } from '@react-navigation/native-stack';
-import * as FileSystem from 'expo-file-system';
-import * as Sharing from 'expo-sharing';
-import { Alert } from 'react-native';
+import * as FileSystem from 'expo-file-system'; // Para manipular archivos en el sistema
+import * as Sharing from 'expo-sharing'; // Para compartir archivos
+import { Alert } from 'react-native'; // Para mostrar alertas nativas
 
+// Importaciones de navegación y capa de dominio
 import { RootStackParamList } from '../../../navigation/AppNavigator';
 import { RegexTesterViewModel } from '../../features/regexTester/viewmodels/RegexTesterViewModel';
 import { RegexParserDataSource } from '../../../data/datasources/RegexParserDataSource';
@@ -18,11 +20,12 @@ import { RegexRepositoryImpl } from '../../../data/repositories_impl/RegexReposi
 import { ParseRegexUseCase } from '../../../domain/usecases/ParseRegexUseCase';
 import { RegexTesterTemplate } from '../../components/templates/RegexTesterTemplate';
 
+// Componente principal observado por MobX
 export const RegexTesterScreen = observer(() => {
-  const navigation =
-    useNavigation<NativeStackNavigationProp<RootStackParamList>>();
+  const navigation = useNavigation<NativeStackNavigationProp<RootStackParamList>>();
   const route = useRoute<RouteProp<RootStackParamList, 'RegexTester'>>();
 
+  // Memoiza la instancia del ViewModel para que no se regenere innecesariamente
   const viewModel = useMemo(() => {
     const dataSource = new RegexParserDataSource();
     const repository = new RegexRepositoryImpl(dataSource);
@@ -30,6 +33,7 @@ export const RegexTesterScreen = observer(() => {
     return new RegexTesterViewModel(useCase);
   }, []);
 
+  // Carga los parámetros de navegación (si los hay) al enfocar esta pantalla
   useFocusEffect(
     React.useCallback(() => {
       if (route.params?.pattern && typeof route.params.flags === 'string') {
@@ -39,6 +43,7 @@ export const RegexTesterScreen = observer(() => {
     }, [route.params])
   );
 
+  // Exporta el AST como JSON, permitiendo guardar o compartir
   const exportAST = async (ast: any) => {
     if (!ast) {
       Alert.alert('AST vacío', 'No se ha generado el AST para exportar.');
@@ -46,7 +51,7 @@ export const RegexTesterScreen = observer(() => {
     }
 
     try {
-      const json = JSON.stringify(ast, null, 2);
+      const json = JSON.stringify(ast, null, 2); // Serializa el AST con sangría
       const now = new Date();
       const datePart = now.toISOString().slice(0, 10).replace(/-/g, '');
       const timePart = now.toTimeString().slice(0, 5).replace(':', '');
@@ -54,11 +59,13 @@ export const RegexTesterScreen = observer(() => {
       const folder = FileSystem.documentDirectory + 'ASTs/';
       const path = folder + filename;
 
+      // Crea la carpeta si no existe
       const folderInfo = await FileSystem.getInfoAsync(folder);
       if (!folderInfo.exists) {
         await FileSystem.makeDirectoryAsync(folder, { intermediates: true });
       }
 
+      // Muestra opciones de exportación
       Alert.alert('Exportar AST', '¿Qué deseas hacer con el archivo?', [
         { text: 'Cancelar', style: 'cancel' },
         {
@@ -79,10 +86,7 @@ export const RegexTesterScreen = observer(() => {
             if (await Sharing.isAvailableAsync()) {
               await Sharing.shareAsync(path);
             } else {
-              Alert.alert(
-                'Error',
-                'Compartir no está disponible en este dispositivo'
-              );
+              Alert.alert('Error', 'Compartir no está disponible en este dispositivo');
             }
           },
         },
@@ -93,6 +97,7 @@ export const RegexTesterScreen = observer(() => {
     }
   };
 
+  // Navega a la pantalla del diagrama AST
   const goToDiagram = () => {
     try {
       const { nodes, connections } = viewModel.getVisualASTNodes();
@@ -117,6 +122,7 @@ export const RegexTesterScreen = observer(() => {
     }
   };
 
+  // Navega a la pantalla del diagrama de ferrocarril
   const goToRailroad = () => {
     const expression = viewModel.pattern;
     if (!expression) {
@@ -129,6 +135,7 @@ export const RegexTesterScreen = observer(() => {
     navigation.navigate('RailroadDiagram', { pattern: expression });
   };
 
+  // Renderiza el template principal con todos los datos del ViewModel
   return (
     <RegexTesterTemplate
       inputText={viewModel.inputText}

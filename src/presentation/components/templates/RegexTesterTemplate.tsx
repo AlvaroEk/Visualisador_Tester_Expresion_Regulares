@@ -1,4 +1,5 @@
 import React from 'react';
+// Importa componentes básicos de UI y listas desde React Native
 import {
   FlatList,
   Text,
@@ -7,16 +8,21 @@ import {
   ListRenderItem,
   TouchableOpacity,
 } from 'react-native';
+// Importa MobX observer para que el componente reaccione a cambios observables
 import { observer } from 'mobx-react-lite';
+// Importa el store de tema para aplicar tema claro/oscuro
 import { themeStore } from '../../../store/themeStore';
+// Paleta de colores global del tema
 import { Colors } from '../../../theme/colors';
 
-import { RegexForm } from '../organisms/RegexForm';
-import { ASTTree } from '../organisms/ASTTree';
-import { MatchHighlight } from '../atoms/MatchHighlight';
-import { HighlightedText } from '../atoms/HighlightedText';
-import ThemeToggle from '../molecules/ThemeToggle';
+// Importa componentes del módulo visual
+import { RegexForm } from '../organisms/RegexForm';         // Formulario de entrada para regex
+import { ASTTree } from '../organisms/ASTTree';             // Árbol de sintaxis abstracta (AST)
+import { MatchHighlight } from '../atoms/MatchHighlight';   // Componente para mostrar coincidencias individuales
+import { HighlightedText } from '../atoms/HighlightedText'; // Componente que subraya coincidencias en el texto
+import ThemeToggle from '../molecules/ThemeToggle';         // Botón para cambiar de tema claro/oscuro
 
+// Interfaz que define las propiedades que recibe esta plantilla
 interface Props {
   inputText: string;
   pattern: string;
@@ -34,6 +40,7 @@ interface Props {
   onOpenRailroad: () => void;
 }
 
+// Componente principal que renderiza la pantalla del Regex Tester
 export const RegexTesterTemplate = observer(({
   inputText,
   pattern,
@@ -50,24 +57,26 @@ export const RegexTesterTemplate = observer(({
   onOpenDiagram,
   onOpenRailroad,
 }: Props) => {
-  const isDark = themeStore.resolvedMode === 'dark';
-  const theme = isDark ? Colors.dark : Colors.light;
+  const isDark = themeStore.resolvedMode === 'dark';              // Detecta si está en modo oscuro
+  const theme = isDark ? Colors.dark : Colors.light;              // Asigna la paleta de colores según el modo
 
+  // Función para renderizar coincidencias (no usada directamente con FlatList aquí)
   const renderItem: ListRenderItem<string> = ({ item, index }) => (
     <MatchHighlight key={index} match={item} />
   );
 
   return (
     <FlatList
-      style={[styles.wrapper, { backgroundColor: theme.background }]}
+      style={[styles.wrapper, { backgroundColor: theme.background }]} // Aplica fondo dinámico
       contentContainerStyle={styles.content}
-      data={[]} // ✅ No se muestran matches en la lista, solo como subrayado
+      data={[]}                 // FlatList no muestra ítems; todo está en ListHeaderComponent
       keyExtractor={(_, index) => index.toString()}
       renderItem={null}
       ListHeaderComponent={
         <View>
           <ThemeToggle />
 
+          {/* Formulario para ingresar texto, patrón y flags */}
           <RegexForm
             inputText={inputText}
             pattern={pattern}
@@ -78,6 +87,7 @@ export const RegexTesterTemplate = observer(({
             flagError={flagError}
           />
 
+          {/* Botón para abrir el historial */}
           <View style={styles.section}>
             <StyledButton
               title="VER HISTORIAL COMPLETO"
@@ -87,29 +97,33 @@ export const RegexTesterTemplate = observer(({
             />
           </View>
 
+          {/* Título para la sección de coincidencias */}
           <Text style={[styles.heading, { color: theme.text }]}>
             Texto con Coincidencias:
           </Text>
 
+          {/* Texto principal con coincidencias resaltadas */}
           <HighlightedText text={inputText} indices={indices ?? []} />
 
+          {/* Cantidad total de coincidencias encontradas */}
           <Text style={[styles.countText, { color: theme.secondaryText }]}>
             Total de coincidencias: {matches?.length ?? 0}
           </Text>
 
+          {/* Si hay coincidencias, renderiza los resultados individuales */}
           {matches?.length > 0 && (
             <>
               <Text style={[styles.resultText, { color: theme.text }]}>
                 Resultados:
               </Text>
 
-              {/* ✅ Mostrar resultados como MatchHighlight */}
               {matches.map((match, index) => (
                 <MatchHighlight key={index} match={match} />
               ))}
             </>
           )}
 
+          {/* Si hay un AST válido, muestra opciones para exportar o visualizar */}
           {ast && (
             <>
               <View style={styles.section}>
@@ -142,11 +156,14 @@ export const RegexTesterTemplate = observer(({
           )}
         </View>
       }
-      ListFooterComponent={ast ? <ASTTree ast={ast} textColor={theme.text} /> : null}
+      ListFooterComponent={
+        ast ? <ASTTree ast={ast} textColor={theme.text} /> : null // Muestra el árbol AST al final
+      }
     />
   );
 });
 
+// Componente reutilizable de botón con estilos personalizados
 const StyledButton = ({
   title,
   color,
@@ -163,6 +180,7 @@ const StyledButton = ({
   </TouchableOpacity>
 );
 
+// Estilos del componente
 const styles = StyleSheet.create({
   wrapper: {
     flex: 1,

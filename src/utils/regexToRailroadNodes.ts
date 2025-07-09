@@ -1,3 +1,4 @@
+// Importa el parser de expresiones regulares y tipos del AST de la librería regexpp
 import { RegExpParser } from 'regexpp';
 import type {
   Alternative,
@@ -10,54 +11,78 @@ import type {
   CapturingGroup,
   Group,
   Quantifier,
+  Pattern,
 } from 'regexpp/ast';
 
+// Tipo de nodo visual que será usado para construir el diagrama de ferrocarril
 export interface RailroadVisualNode {
-  type: 'start' | 'end' | 'text' | 'group' | 'sequence';
-  label?: string;
-  children?: RailroadVisualNode[];
+  type: 'start' | 'end' | 'text' | 'group' | 'sequence'; // Tipos posibles de nodo
+  label?: string; // Texto que aparecerá dentro del nodo (opcional)
+  children?: RailroadVisualNode[]; // Subnodos hijos (para grupos o secuencias)
 }
 
+// Función principal que convierte un patrón RegEx en un array de nodos visuales
 export function parseRegexToRailroadNodes(pattern: string): RailroadVisualNode[] {
   try {
     const parser = new RegExpParser();
-    const ast = parser.parsePattern(pattern, 0, pattern.length, false);
+    const ast: Pattern = parser.parsePattern(pattern, 0, pattern.length, false); // Parsea la expresión regular
+
+    // Caso especial: patrones simples con palabras separadas por |, como FELIZ|TRISTE|ENOJADO
+    if (/^(\w+)(\|\w+)+$/.test(pattern)) {
+      return pattern.split('|').map((word) => ({
+        type: 'sequence',
+        children: [
+          { type: 'start' }, // Nodo de inicio
+          ...word.split('').map(
+            (char): RailroadVisualNode => ({
+              type: 'text', // Un nodo por cada letra
+              label: char,
+            })
+          ),
+          { type: 'end' }, // Nodo de fin
+        ],
+      }));
+    }
+
+    // Caso general: expresión regular compleja, convertir usando el AST
     return ast.alternatives.map(convertAlternative);
   } catch (error) {
     console.error('Error al parsear patrón RegEx:', error);
+    // Si ocurre un error, se devuelve un nodo que indique el fallo
     return [{ type: 'text', label: 'Error al parsear expresión' }];
   }
 }
 
+// Convierte una alternativa (una secuencia posible del regex) en un nodo de tipo 'sequence'
 function convertAlternative(alt: Alternative): RailroadVisualNode {
-  const children = alt.elements.map(el => convertElement(el));
+  const children = alt.elements.map(el => convertElement(el)); // Convierte cada elemento
   return {
     type: 'sequence',
     children: [
-      { type: 'start' },
-      ...children,
-      { type: 'end' }
+      { type: 'start' }, // Nodo inicial
+      ...children,       // Nodos intermedios
+      { type: 'end' }    // Nodo final
     ]
   };
 }
 
+// Convierte un nodo del AST en un nodo visual de tipo RailroadVisualNode
 function convertElement(el: Element): RailroadVisualNode {
   switch (el.type) {
     case 'Character':
-      return { type: 'text', label: (el as Character).raw };
-
     case 'CharacterClass':
-      return { type: 'text', label: (el as CharacterClass).raw };
-
     case 'CharacterSet':
     case 'Backreference':
-      return { type: 'text', label: (el as CharacterSet | Backreference).raw };
+      // Tipos que se pueden representar directamente como texto
+      return { type: 'text', label: el.raw };
 
     case 'Assertion':
-      return { type: 'group', label: (el as Assertion).raw, children: [] };
+      // Afirmaciones como ^, $, \b se colocan como un grupo sin hijos
+      return { type: 'group', label: el.raw, children: [] };
 
     case 'CapturingGroup':
     case 'Group':
+      // Agrupaciones con subalternativas; se extraen y se aplanan los hijos
       return {
         type: 'group',
         label: el.raw,
@@ -65,6 +90,7 @@ function convertElement(el: Element): RailroadVisualNode {
       };
 
     case 'Quantifier':
+      // Cuantificadores como *, +, ? aplicados sobre otro nodo
       const child = convertElement(el.element);
       return {
         type: 'group',
@@ -73,6 +99,7 @@ function convertElement(el: Element): RailroadVisualNode {
       };
 
     default:
+      // Cualquier otro tipo desconocido se representa como texto genérico
       return { type: 'text', label: 'desconocido' };
   }
 }

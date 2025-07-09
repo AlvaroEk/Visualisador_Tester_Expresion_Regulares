@@ -13,13 +13,13 @@ import { themeStore } from '../../../store/themeStore';
 
 // Define las props que acepta el componente RegexForm
 interface Props {
-  inputText: string;                    // Texto sobre el cual aplicar la expresión
-  pattern: string;                      // Patrón de la expresión regular
-  flags: string;                        // Flags seleccionados
-  onInputChange: (text: string) => void;    // Manejador del texto de entrada
-  onPatternChange: (text: string) => void;  // Manejador del patrón de expresión
-  onFlagsChange: (text: string) => void;    // Manejador de flags
-  flagError?: string;                  // Texto de error si hay flags inválidos
+  inputText: string;                        // Texto sobre el cual aplicar la expresión
+  pattern: string;                          // Patrón de la expresión regular
+  flags: string;                            // Flags seleccionados (ej. "gi")
+  onInputChange: (text: string) => void;    // Manejador para cambios en el texto de entrada
+  onPatternChange: (text: string) => void;  // Manejador para cambios en el patrón
+  onFlagsChange: (text: string) => void;    // Manejador para cambios en los flags
+  flagError?: string;                       // Texto de error si hay flags inválidos
 }
 
 // Componente funcional RegexForm observado por MobX
@@ -40,8 +40,8 @@ export const RegexForm = observer(({
 
   // Función que detecta flags inválidos comparándolos con los válidos
   const extractInvalidFlags = (flags: string): string[] => {
-    const valid = 'gimsuy';
-    return flags.split('').filter(f => !valid.includes(f));
+    const valid = 'gimsuy'; // Lista de flags válidos en JavaScript
+    return flags.split('').filter(f => !valid.includes(f)); // Devuelve solo los inválidos
   };
 
   return (
@@ -110,18 +110,18 @@ const styles = StyleSheet.create({
     fontWeight: 'bold',
     marginTop: 12,
     marginBottom: 4,
-    color: '#222',
+    color: '#222', // Color por defecto (modo claro)
   },
   labelDark: {
-    color: '#eee',
+    color: '#eee', // Color para modo oscuro
   },
   help: {
-    color: '#007bff',
+    color: '#007bff', // Azul interactivo
     marginTop: 6,
     marginBottom: 2,
   },
   helpDark: {
-    color: '#80bfff',
+    color: '#80bfff', // Azul claro para modo oscuro
   },
   helpBox: {
     backgroundColor: '#f0f0f0',
