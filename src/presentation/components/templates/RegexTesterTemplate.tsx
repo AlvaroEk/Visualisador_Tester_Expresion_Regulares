@@ -2,10 +2,10 @@ import React from 'react';
 import {
   FlatList,
   Text,
-  Button,
   View,
   StyleSheet,
   ListRenderItem,
+  TouchableOpacity,
 } from 'react-native';
 import { observer } from 'mobx-react-lite';
 import { themeStore } from '../../../store/themeStore';
@@ -31,7 +31,7 @@ interface Props {
   onOpenHistory: () => void;
   onExportAST: (ast: any) => Promise<void>;
   onOpenDiagram: () => void;
-  onOpenRailroad: () => void; 
+  onOpenRailroad: () => void;
 }
 
 export const RegexTesterTemplate = observer(({
@@ -48,7 +48,7 @@ export const RegexTesterTemplate = observer(({
   onOpenHistory,
   onExportAST,
   onOpenDiagram,
-  onOpenRailroad, 
+  onOpenRailroad,
 }: Props) => {
   const isDark = themeStore.resolvedMode === 'dark';
   const theme = isDark ? Colors.dark : Colors.light;
@@ -61,9 +61,9 @@ export const RegexTesterTemplate = observer(({
     <FlatList
       style={[styles.wrapper, { backgroundColor: theme.background }]}
       contentContainerStyle={styles.content}
-      data={matches || []}
+      data={[]} // ✅ No se muestran matches en la lista, solo como subrayado
       keyExtractor={(_, index) => index.toString()}
-      renderItem={renderItem}
+      renderItem={null}
       ListHeaderComponent={
         <View>
           <ThemeToggle />
@@ -79,10 +79,11 @@ export const RegexTesterTemplate = observer(({
           />
 
           <View style={styles.section}>
-            <Button
-              title="Ver historial completo"
-              onPress={onOpenHistory}
+            <StyledButton
+              title="VER HISTORIAL COMPLETO"
               color={theme.chipActive}
+              onPress={onOpenHistory}
+              textColor="#fff"
             />
           </View>
 
@@ -97,34 +98,44 @@ export const RegexTesterTemplate = observer(({
           </Text>
 
           {matches?.length > 0 && (
-            <Text style={[styles.resultText, { color: theme.text }]}>
-              Resultados:
-            </Text>
+            <>
+              <Text style={[styles.resultText, { color: theme.text }]}>
+                Resultados:
+              </Text>
+
+              {/* ✅ Mostrar resultados como MatchHighlight */}
+              {matches.map((match, index) => (
+                <MatchHighlight key={index} match={match} />
+              ))}
+            </>
           )}
 
           {ast && (
             <>
               <View style={styles.section}>
-                <Button
-                  title="Exportar AST"
-                  onPress={() => onExportAST(ast)}
+                <StyledButton
+                  title="EXPORTAR AST"
                   color={theme.accent}
+                  onPress={() => onExportAST(ast)}
+                  textColor="#fff"
                 />
               </View>
 
               <View style={styles.section}>
-                <Button
-                  title="Ver Diagrama AST"
-                  onPress={onOpenDiagram}
+                <StyledButton
+                  title="VER DIAGRAMA AST"
                   color={theme.primary}
+                  onPress={onOpenDiagram}
+                  textColor="#fff"
                 />
               </View>
 
               <View style={styles.section}>
-                <Button
-                  title="Ver Diagrama de Ferrocarril"
-                  onPress={onOpenRailroad}
+                <StyledButton
+                  title="VER DIAGRAMA DE FERROCARRIL"
                   color={theme.warning}
+                  onPress={onOpenRailroad}
+                  textColor="#000"
                 />
               </View>
             </>
@@ -135,6 +146,22 @@ export const RegexTesterTemplate = observer(({
     />
   );
 });
+
+const StyledButton = ({
+  title,
+  color,
+  onPress,
+  textColor = '#fff',
+}: {
+  title: string;
+  color: string;
+  onPress: () => void;
+  textColor?: string;
+}) => (
+  <TouchableOpacity onPress={onPress} style={[styles.button, { backgroundColor: color }]}>
+    <Text style={[styles.buttonText, { color: textColor }]}>{title}</Text>
+  </TouchableOpacity>
+);
 
 const styles = StyleSheet.create({
   wrapper: {
@@ -159,5 +186,16 @@ const styles = StyleSheet.create({
     marginVertical: 10,
     fontSize: 15,
     fontWeight: '600',
+  },
+  button: {
+    borderRadius: 8,
+    paddingVertical: 12,
+    paddingHorizontal: 16,
+    alignItems: 'center',
+  },
+  buttonText: {
+    fontSize: 14,
+    fontWeight: 'bold',
+    textTransform: 'uppercase',
   },
 });
