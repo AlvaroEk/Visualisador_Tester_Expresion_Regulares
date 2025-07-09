@@ -1,7 +1,7 @@
 import React from 'react';
-import { Rect, Text as SvgText } from 'react-native-svg';
+import { G, Rect, Text as SvgText } from 'react-native-svg';
 
-interface RailroadBoxProps {
+interface Props {
   x: number;
   y: number;
   width: number;
@@ -10,30 +10,31 @@ interface RailroadBoxProps {
   bold?: boolean;
 }
 
-const RailroadBox: React.FC<RailroadBoxProps> = ({ x, y, width, height, text, bold }) => {
+const RailroadBox: React.FC<Props> = ({ x, y, width, height, text, bold = false }) => {
   return (
-    <>
+    <G>
       <Rect
         x={x}
         y={y}
-        rx={10}
-        ry={10}
+        rx={8}
+        ry={8}
         width={width}
         height={height}
-        stroke="black"
-        fill="white"
-        strokeWidth={2}
+        fill="#e6f0ff"
+        stroke="#3366cc"
+        strokeWidth={1.5}
       />
       <SvgText
         x={x + width / 2}
-        y={y + height / 2 + 5}
-        fontSize={14}
+        y={y + height / 2 + 4}
+        fontSize="14"
         fontWeight={bold ? 'bold' : 'normal'}
+        fill="#000"
         textAnchor="middle"
       >
         {text}
       </SvgText>
-    </>
+    </G>
   );
 };
 

@@ -1,74 +1,167 @@
 import React from 'react';
+import { View, Text, ScrollView, useWindowDimensions } from 'react-native';
 import Svg from 'react-native-svg';
-import { View } from 'react-native';
-
+import RailroadNode from '../atoms/RailroadNode';
 import RailroadBox from '../atoms/RailroadBox';
 import RailroadConnection from '../atoms/RailroadConnection';
-import RailroadNode from '../atoms/RailroadNode';
+import { parseRegexToRailroadNodes, RailroadVisualNode } from '../../../utils/regexToRailroadNodes';
 
 interface Props {
   pattern: string;
 }
 
-const BOX_WIDTH = 100;
-const BOX_HEIGHT = 40;
-const PADDING_X = 40;
-const PADDING_Y = 30;
-const SPACING_Y = 70;
-const CONNECTOR = 20;
+const BOX_HEIGHT = 0;
+const BOX_PADDING = 20;
+const TEXT_SIZE = 8;
+const MIN_WIDTH = 70;
+const START_OFFSET = 20;
 
-const RailroadDiagram: React.FC<Props> = ({ pattern }) => {
-  const options = pattern.split('|');
-  const totalHeight = options.length * SPACING_Y + PADDING_Y * 2;
-  const totalWidth = PADDING_X + BOX_WIDTH + CONNECTOR * 4;
+export default function RailroadDiagram({ pattern }: Props) {
+  const { width: windowWidth } = useWindowDimensions();
+  const sequences = parseRegexToRailroadNodes(pattern);
+
+  const measureTextWidth = (text: string) =>
+    Math.max(MIN_WIDTH, text.length * TEXT_SIZE);
+
+  const renderNode = (
+    node: RailroadVisualNode,
+    x: number,
+    y: number,
+    keyPrefix: string
+  ): any[] => {
+    const elements: any[] = [];
+    const verticalAlign = y - BOX_HEIGHT / 2;
+
+    if (node.type === 'start') {
+      // Solo el nodo, sin conexión
+      elements.push(
+        <RailroadNode key={`${keyPrefix}-start`} cx={x} cy={y} type="start" />
+      );
+    }
+
+    if (node.type === 'end') {
+      elements.push(
+        <RailroadNode key={`${keyPrefix}-end`} cx={x} cy={y} type="end" />
+      );
+    }
+
+    if (node.type === 'text') {
+      const width = measureTextWidth(node.label ?? '');
+      elements.push(
+        <RailroadBox
+          key={`${keyPrefix}-text`}
+          x={x}
+          y={verticalAlign}
+          width={width}
+          height={BOX_HEIGHT}
+          text={node.label ?? ''}
+        />
+      );
+    }
+
+    if (node.type === 'group' || node.type === 'sequence') {
+      const children = node.children ?? [];
+      let currentX = x;
+      const childWidths = children.map((c) => measureTextWidth(c.label ?? ''));
+
+      children.forEach((child, idx) => {
+        const width = childWidths[idx];
+
+        // Si el primero es un nodo de inicio, se conecta directamente a lo que sigue
+        if (idx === 0 && child.type === 'start') {
+          // Render el nodo de inicio
+          elements.push(
+            ...renderNode(child, currentX, y, `${keyPrefix}-child-${idx}`)
+          );
+          // Línea que conecta el nodo de inicio al siguiente
+          elements.push(
+            <RailroadConnection
+              key={`${keyPrefix}-start-conn`}
+              x1={currentX + 5}
+              y1={y}
+              x2={currentX + 20}
+              y2={y}
+            />
+          );
+          currentX += 20; // Desplazamiento después del nodo
+        } else {
+          if (idx > 0) {
+            elements.push(
+              <RailroadConnection
+                key={`${keyPrefix}-conn-${idx}`}
+                x1={currentX - BOX_PADDING}
+                y1={y}
+                x2={currentX}
+                y2={y}
+              />
+            );
+          }
+
+          elements.push(
+            ...renderNode(child, currentX, y, `${keyPrefix}-child-${idx}`)
+          );
+          currentX += width + BOX_PADDING;
+        }
+      });
+
+      if (node.label) {
+        elements.push(
+          <RailroadBox
+            key={`${keyPrefix}-label`}
+            x={x}
+            y={y - BOX_HEIGHT - 30}
+            width={measureTextWidth(node.label)}
+            height={30}
+            text={node.label}
+            bold
+          />
+        );
+      }
+    }
+
+    return elements;
+  };
+
+  const totalWidth = sequences.reduce((sum, node) => {
+    const children = node.children ?? [];
+    const widths = children.map(
+      (c) => measureTextWidth(c.label ?? '') + BOX_PADDING
+    );
+    return Math.max(sum, widths.reduce((a, b) => a + b, 200));
+  }, windowWidth);
 
   return (
-    <View>
-      <Svg width={totalWidth} height={totalHeight}>
-        {/* Nodo inicial */}
-        <RailroadNode cx={20} cy={totalHeight / 2} type="start" />
+    <View style={{ backgroundColor: '#fff', padding: 10 }}>
+      <Text
+        style={{
+          fontWeight: 'bold',
+          fontSize: 18,
+          textAlign: 'center',
+          marginBottom: 10,
+        }}
+      >
+        Diagrama de Ferrocarril
+      </Text>
 
-        {/* Ramas de alternativas */}
-        {options.map((text, i) => {
-          const y = PADDING_Y + i * SPACING_Y;
-          const boxX = PADDING_X + CONNECTOR * 2;
-          const boxY = y;
+      <Text
+        style={{
+          textAlign: 'center',
+          fontSize: 14,
+          marginBottom: 10,
+        }}
+      >
+        {pattern}
+      </Text>
 
-          // Curva desde nodo inicial hacia cada opción
-          const curveD = `M20,${totalHeight / 2} C40,${totalHeight / 2} 40,${boxY + BOX_HEIGHT / 2} ${boxX},${boxY + BOX_HEIGHT / 2}`;
-          const exitD = `M${boxX + BOX_WIDTH},${boxY + BOX_HEIGHT / 2} h${CONNECTOR}`;
-
-          return (
-            <React.Fragment key={i}>
-              <RailroadConnection d={curveD} />
-              <RailroadBox
-                x={boxX}
-                y={boxY}
-                width={BOX_WIDTH}
-                height={BOX_HEIGHT}
-                text={text}
-                bold={i === 0}
-              />
-              <RailroadConnection d={exitD} />
+      <ScrollView horizontal>
+        <Svg width={totalWidth + 100} height={120}>
+          {sequences.map((seq, index) => (
+            <React.Fragment key={`seq-${index}`}>
+              {renderNode(seq, START_OFFSET, 60, `seq-${index}`)}
             </React.Fragment>
-          );
-        })}
-
-        {/* Línea que une todas las salidas al nodo final */}
-        <RailroadConnection
-          d={`M${PADDING_X + BOX_WIDTH + CONNECTOR * 3},${PADDING_Y + BOX_HEIGHT / 2} 
-              V${PADDING_Y + (options.length - 1) * SPACING_Y + BOX_HEIGHT / 2}`}
-        />
-
-        {/* Nodo final */}
-        <RailroadNode
-          cx={PADDING_X + BOX_WIDTH + CONNECTOR * 3 + 10}
-          cy={totalHeight / 2}
-          type="end"
-        />
-      </Svg>
+          ))}
+        </Svg>
+      </ScrollView>
     </View>
   );
-};
-
-export default RailroadDiagram;
+}

@@ -25,7 +25,10 @@ const RailroadDiagramScreen = observer(() => {
       <Text style={styles.title}>Diagrama de Ferrocarril</Text>
       <Text style={styles.pattern}>{pattern}</Text>
 
-      <RailroadDiagram pattern={pattern} />
+      {/* ENVUELVE EL DIAGRAMA EN UN SCROLLVIEW HORIZONTAL */}
+      <ScrollView horizontal>
+        <RailroadDiagram pattern={pattern} />
+      </ScrollView>
     </ScrollView>
   );
 });
@@ -54,6 +57,7 @@ const styles = StyleSheet.create({
   pattern: {
     fontSize: 16,
     marginBottom: 20,
+    textAlign: 'center',
   },
 });
 
